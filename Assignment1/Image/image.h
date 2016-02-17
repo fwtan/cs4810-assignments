@@ -64,6 +64,9 @@ public:
 	/** This method returns the height of the image */
 	int height(void) const;
 
+	/** This method returns true if the coordinate is within the image range*/
+	bool contain(const float& x, const float& y) const;
+
 	/** This method returns a reference to the indexed pixel.*/
 	Pixel32& operator() (const int& x,const int& y);
 
