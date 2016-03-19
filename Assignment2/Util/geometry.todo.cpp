@@ -17,45 +17,7 @@ using namespace std;
 ///////////////////////
 double BoundingBox3D::intersect(const Ray3D& ray) const 
 {
-	double min_d = std::numeric_limits<double>::max();
-
-	Point3D p0 = ray.position;
-	Point3D v = ray.direction;
-
-	if (p0[0] < 0)
-	{
-		Point3D p1 = p[1];
-		min_d = min(min_d, (p1[0] - p0[0])/v[0]);
-	}
-	else
-	{
-		Point3D p1 = p[0];
-		min_d = min(min_d, (p1[0] - p0[0])/v[0]);
-	}
-
-	if (p0[1] < 0)
-	{
-		Point3D p1 = p[1];
-		min_d = min(min_d, (p1[1] - p0[1])/v[1]);
-	}
-	else
-	{
-		Point3D p1 = p[0];
-		min_d = min(min_d, (p1[1] - p0[1])/v[1]);
-	}
-
-	if (p0[2] < 0)
-	{
-		Point3D p1 = p[1];
-		min_d = min(min_d, (p1[2] - p0[2])/v[2]);
-	}
-	else
-	{
-		Point3D p1 = p[0];
-		min_d = min(min_d, (p1[2] - p0[2])/v[2]);
-	}
-
-	return min_d;
+	return -1;
 }
 
 /////////////////////
