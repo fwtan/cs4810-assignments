@@ -1,6 +1,6 @@
 #ifndef GROUP_INCLUDED
 #define GROUP_INCLUDED
-#include <Util/geometry.h>
+#include "../Util/geometry.h"
 #include "rayShape.h"
 #include "rayScene.h"
 

@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include "Image/lineSegments.h"
 
+#include <algorithm>
+// basic functions
+template <class T>
+static inline T EnforceRange(const T& x, const T& MaxValue) 
+{
+	return std::min(std::max(T(x), T(0)), T(MaxValue));
+}
+
 /** The value of pi to many significant digits/*/
 #define PI 3.1415926535897932384
 

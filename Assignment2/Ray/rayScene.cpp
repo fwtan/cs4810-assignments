@@ -841,10 +841,11 @@ int RayScene::RayTrace(const int& width,const int& height,const int& rLimit,cons
 		printf("%3.1f\r",(float)i/width*100);
 		for(j=0;j<height;j++){
 			ray=GetRay(camera,i,height-j-1,width,height);
+//			printf("%f, %f, %f\n", ray.direction[0], ray.direction[1], ray.direction[2]);
 			c=GetColor(ray,rLimit,Point3D(cLimit,cLimit,cLimit));
-			p.r=(int)(c[0]*255);
-			p.g=(int)(c[1]*255);
-			p.b=(int)(c[2]*255);
+			p.r=EnforceRange(c[0]*255+0.5, 255.0);
+			p.g=EnforceRange(c[1]*255+0.5, 255.0);
+			p.b=EnforceRange(c[2]*255+0.5, 255.0);
 			img(i,j)=p;
 		}
 	}

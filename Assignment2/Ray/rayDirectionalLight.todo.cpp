@@ -6,21 +6,90 @@
 #endif
 #include "rayDirectionalLight.h"
 #include "rayScene.h"
+#include <algorithm>
 
 ////////////////////////
 //  Ray-tracing stuff //
 ////////////////////////
-Point3D RayDirectionalLight::getDiffuse(Point3D cameraPosition,RayIntersectionInfo& iInfo){
-	return Point3D();
+Point3D RayDirectionalLight::getDiffuse(Point3D cameraPosition, RayIntersectionInfo& iInfo)
+{
+	Point3D L = - direction.unit();
+	Point3D N = iInfo.normal.unit();
+	double cos_theta = std::max(0.0, N.dot(L));
+	Point3D Kd = iInfo.material->diffuse;
+	return Kd.mult(color * cos_theta);
 }
-Point3D RayDirectionalLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& iInfo){
-	return Point3D();
+
+Point3D RayDirectionalLight::getSpecular(Point3D cameraPosition, RayIntersectionInfo& iInfo)
+{
+	Point3D L = - direction.unit();
+	Point3D N = iInfo.normal.unit();
+	double cos_theta = N.dot(L);
+	if (cos_theta <= 0)
+	{
+		return Point3D();
+	}
+
+	Point3D V = (cameraPosition - iInfo.iCoordinate).unit();
+	Point3D R = (- L + N * 2 * cos_theta).unit();
+	Point3D Ks = iInfo.material->specular;
+	double cos_beta = std::max(0.0, V.dot(R));
+	return Ks.mult(color * pow(cos_beta, iInfo.material->specularFallOff));
 }
-int RayDirectionalLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& isectCount){
+
+int RayDirectionalLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& isectCount)
+{
+	double factor = 0.001;
+	
+	BoundingBox3D bbox = shape->bBox;
+	Point3D p0 = bbox.p[0];
+	Point3D p1 = bbox.p[1];
+
+	double dist = (p1 - p0).length();
+
+	Ray3D ray;
+	ray.position  = iInfo.iCoordinate + iInfo.normal * (dist * factor);
+	ray.direction = - direction / direction.length();
+
+	RayIntersectionInfo iNewInfo;
+	if (shape->intersect(ray, iNewInfo) > 0)
+	{
+		++isectCount;
+		return 1;
+	}
+
 	return 0;
 }
-Point3D RayDirectionalLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit){
-	return Point3D(1,1,1);
+
+Point3D RayDirectionalLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit)
+{
+	double factor = 0.001;
+	
+	BoundingBox3D bbox = shape->bBox;
+	Point3D p0 = bbox.p[0];
+	Point3D p1 = bbox.p[1];
+
+	double dist = (p1 - p0).length();
+
+	Ray3D ray;
+	ray.position  = iInfo.iCoordinate + iInfo.normal * (dist * factor);
+	ray.direction = - direction / direction.length();
+
+	RayIntersectionInfo iNewInfo;
+	Point3D trans(1,1,1);
+	if (shape->intersect(ray, iNewInfo) > 0)
+	{
+		Point3D intersected_trans = iNewInfo.material->transparent;
+		Point3D factor = intersected_trans.mult(intersected_trans);
+		if (factor[0] < cLimit[0] && factor[1] < cLimit[1] && factor[2] < cLimit[2])
+		{
+			return Point3D();
+		}
+
+		trans = factor.mult(transparency(iNewInfo, shape, cLimit));
+	}
+	
+	return trans;
 }
 
 //////////////////

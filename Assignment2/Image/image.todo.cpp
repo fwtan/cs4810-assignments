@@ -2,18 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 // allows the use of min() and max() functions
-#include <algorithm>
 #include <iostream>
 #include <stdio.h>
 using namespace std;
-
-// basic functions
-template <class T>
-static inline T EnforceRange(const T& x, const T& MaxValue) 
-{
-	return std::min(std::max(T(x), T(0)), T(MaxValue));
-}
-
 
 Pixel::Pixel(const Pixel32& p)
 {
