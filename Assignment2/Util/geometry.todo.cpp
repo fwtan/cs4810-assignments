@@ -30,7 +30,6 @@ bool bContain3D(Point3D p1, Point3D p2, Point3D query)
 ///////////////////////
 double BoundingBox3D::intersect(const Ray3D& ray) const 
 {
-
     Point3D ray_c = ray.position;
     Point3D ray_v = ray.direction.unit();
     Point3D p1 = p[0];

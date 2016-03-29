@@ -6,24 +6,41 @@
 #endif
 #include "rayGroup.h"
 
+#include <algorithm>
+
 ////////////////////////
 //  Ray-tracing stuff //
 ////////////////////////
 double RayGroup::intersect(Ray3D ray, RayIntersectionInfo& iInfo, double mx)
 {
+	if (bBox.intersect(ray) < 0)
+	{
+		return -1;
+	}
+
 	Ray3D transformed_ray = getInverseMatrix().mult(ray);
 	double s = transformed_ray.direction.length();
-	transformed_ray.direction = transformed_ray.direction.unit();
-
-
-	
+	transformed_ray.direction = transformed_ray.direction.unit();	
 	double transformed_mx = s * mx;
 
 	mx = -1;
 
 	for (int i = 0; i < sNum; ++i)
 	{
-		double dist = shapes[i]->intersect(transformed_ray, iInfo, transformed_mx);
+		double dist = shapes[i]->bBox.intersect(transformed_ray);
+		if (dist < 0)
+		{
+			dist = std::numeric_limits<double>::max();
+		}
+		hits[i].t = dist;
+		hits[i].shape = shapes[i];
+	}
+
+	qsort(hits, sNum, sizeof(RayShapeHit), RayShapeHit::Compare);
+
+	for (int i = 0; i < sNum; ++i)
+	{
+		double dist = hits[i].shape->intersect(transformed_ray, iInfo, transformed_mx);
 		if (dist > 0)
 		{
 			transformed_mx = dist;
@@ -31,6 +48,7 @@ double RayGroup::intersect(Ray3D ray, RayIntersectionInfo& iInfo, double mx)
 			iInfo.iCoordinate = getMatrix().multPosition(iInfo.iCoordinate);
 			iInfo.normal = getNormalMatrix().multDirection(iInfo.normal);
 			iInfo.normal = iInfo.normal.unit();
+			break;
 		}
 	}
 
@@ -45,6 +63,8 @@ BoundingBox3D RayGroup::setBoundingBox(void)
 		shapes[i]->setBoundingBox();
 		bBox += shapes[i]->bBox;
 	}
+
+	bBox = bBox.transform(getMatrix());
 
 	return bBox;
 }
