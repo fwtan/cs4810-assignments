@@ -15,7 +15,14 @@ Point3D RayScene::Reflect(Point3D v, Point3D n)
 {
 	v = v.unit();
 	n = n.unit();
-	return (v - n * 2 * (v.dot(n))).unit();
+	double cos_theta = v.dot(n);
+
+	if (cos_theta >= 0)
+	{
+		return Point3D();
+	}
+
+	return (v - n * 2 * (cos_theta)).unit();
 }
 
 int RayScene::Refract(Point3D v, Point3D n, double ir, Point3D& refract)
@@ -74,15 +81,18 @@ Point3D RayScene::GetColor(Ray3D ray, int rDepth, Point3D cLimit)
 		Point3D p1 = bbox.p[1];
 		double dist = (p1 - p0).length();
 
+
 		Ray3D reflected_ray;
 		reflected_ray.direction = Reflect(ray.direction, iInfo.normal);
-		reflected_ray.position = iInfo.iCoordinate + reflected_ray.direction * (dist * factor);
-
-		Point3D Ks = iInfo.material->specular;
-		if (rDepth > 0 && Ks[0] > cLimit[0] && Ks[1] > cLimit[1] && Ks[2] > cLimit[2])
+		if (reflected_ray.direction.length() > 0.5)
 		{
-			Point3D reflected_color = GetColor(reflected_ray, rDepth - 1, cLimit.div(Ks));
-			intensity += Ks.mult(reflected_color);
+			reflected_ray.position = iInfo.iCoordinate + reflected_ray.direction * (dist * factor);
+			Point3D Ks = iInfo.material->specular;
+			if (rDepth > 0 && Ks[0] > cLimit[0] && Ks[1] > cLimit[1] && Ks[2] > cLimit[2])
+			{
+				Point3D reflected_color = GetColor(reflected_ray, rDepth - 1, cLimit.div(Ks));
+				intensity += Ks.mult(reflected_color);
+			}
 		}
 
 		Ray3D refracted_ray;

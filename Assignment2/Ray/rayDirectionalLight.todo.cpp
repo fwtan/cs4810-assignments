@@ -15,7 +15,11 @@ Point3D RayDirectionalLight::getDiffuse(Point3D cameraPosition, RayIntersectionI
 {
 	Point3D L = - direction.unit();
 	Point3D N = iInfo.normal.unit();
-	double cos_theta = std::max(0.0, N.dot(L));
+	double cos_theta = N.dot(L);
+	if (cos_theta <= 0)
+	{
+		return Point3D();
+	}
 	Point3D Kd = iInfo.material->diffuse;
 	return Kd.mult(color * cos_theta);
 }
@@ -33,7 +37,11 @@ Point3D RayDirectionalLight::getSpecular(Point3D cameraPosition, RayIntersection
 	Point3D V = (cameraPosition - iInfo.iCoordinate).unit();
 	Point3D R = (- L + N * 2 * cos_theta).unit();
 	Point3D Ks = iInfo.material->specular;
-	double cos_beta = std::max(0.0, V.dot(R));
+	double cos_beta = V.dot(R);
+	if (cos_beta <= 0)
+	{
+		return Point3D();
+	}
 	return Ks.mult(color * pow(cos_beta, iInfo.material->specularFallOff));
 }
 
