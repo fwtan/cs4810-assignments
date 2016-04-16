@@ -96,7 +96,7 @@ Point3D RayScene::GetColor(Ray3D ray, int rDepth, Point3D cLimit)
 		}
 
 		Ray3D refracted_ray;
-		if (Refract(ray.direction, iInfo.normal, iInfo.material->refind, refracted_ray.direction) > 0)
+		if (Refract(ray.direction, iInfo.normal, 1.0/iInfo.material->refind, refracted_ray.direction) > 0)
 		{
 			refracted_ray.position = iInfo.iCoordinate + refracted_ray.direction * (dist * factor);
 
